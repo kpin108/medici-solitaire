@@ -471,7 +471,6 @@
     const dict = t();
     hidePeek();
     elements.html.lang = currentLanguage;
-    document.title = dict.title;
     elements.meta.textContent = dict.meta;
     elements.title.textContent = dict.title;
     elements.controls.setAttribute("aria-label", dict.controlsLabel);
