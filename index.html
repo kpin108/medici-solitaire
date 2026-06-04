@@ -1,0 +1,65 @@
+<!doctype html>
+<html lang="ru">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Пасьянс Медичи</title>
+    <link rel="stylesheet" href="styles.css">
+  </head>
+  <body>
+    <main class="table-shell">
+      <header class="topbar">
+        <div>
+          <p class="eyebrow">36 карт • от 6 до туза</p>
+          <h1>Пасьянс Медичи</h1>
+        </div>
+        <div class="controls" aria-label="Управление пасьянсом">
+          <button type="button" class="primary" data-next>Ход</button>
+          <button type="button" data-undo>Назад</button>
+          <button type="button" data-auto>Авто</button>
+          <button type="button" data-reset>Сначала</button>
+          <button type="button" data-solvable>Склад</button>
+        </div>
+      </header>
+
+      <section class="status-grid" aria-label="Состояние игры">
+        <div class="stock-card">
+          <div class="deck-back" aria-hidden="true"></div>
+          <div>
+            <span class="metric" data-stock-count>33</span>
+            <span class="label">карт осталось</span>
+          </div>
+        </div>
+        <div>
+          <span class="metric" data-pile-count>3</span>
+          <span class="label">стопок на столе</span>
+        </div>
+        <div>
+          <span class="metric" data-move-count>0</span>
+          <span class="label">ходов</span>
+        </div>
+        <div class="wide">
+          <span class="state" data-state>Ищу первую свертку.</span>
+          <span class="label" data-last-move>Первые три карты уже на столе.</span>
+        </div>
+      </section>
+
+      <section class="board" data-board aria-label="Игровой стол"></section>
+
+      <aside class="rules">
+        <div class="layout-line" aria-live="polite">
+          <strong data-layout-label>Расклад:</strong>
+          <span data-layout></span>
+        </div>
+        <p>
+          <strong>Правило свертки:</strong>
+          если верхние карты левой и правой стопок в любой тройке совпадают по масти или достоинству,
+          средняя стопка переносится на левую. Цель - закончить колоду и оставить две стопки.
+        </p>
+      </aside>
+    </main>
+    <div class="pile-peek" data-peek-layer aria-hidden="true"></div>
+
+    <script src="script.js"></script>
+  </body>
+</html>
