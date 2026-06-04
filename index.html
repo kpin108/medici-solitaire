@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="ru">
+<html lang="en">
   <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -10,51 +10,58 @@
     <main class="table-shell">
       <header class="topbar">
         <div>
-          <p class="eyebrow">36 карт • от 6 до туза</p>
-          <h1>Пасьянс Медичи</h1>
+          <div class="meta-row">
+            <p class="eyebrow" data-meta>36 cards • 6 to ace</p>
+          </div>
+          <h1 data-title>Medici Solitaire</h1>
         </div>
-        <div class="controls" aria-label="Управление пасьянсом">
-          <button type="button" class="primary" data-next>Ход</button>
-          <button type="button" data-undo>Назад</button>
-          <button type="button" data-auto>Авто</button>
-          <button type="button" data-reset>Сначала</button>
-          <button type="button" data-solvable>Склад</button>
+        <div class="header-actions">
+          <div class="language-switch" data-language-switch aria-label="Language switch">
+            <button type="button" data-lang="en" aria-pressed="true">En</button>
+            <button type="button" data-lang="ru" aria-pressed="false">Ru</button>
+          </div>
+          <div class="controls" data-controls aria-label="Solitaire controls">
+            <button type="button" class="primary" data-next>Move</button>
+            <button type="button" data-undo>Back</button>
+            <button type="button" data-auto>Auto</button>
+            <button type="button" data-reset>Restart</button>
+            <button type="button" data-solvable>Solvable</button>
+          </div>
         </div>
       </header>
 
-      <section class="status-grid" aria-label="Состояние игры">
+      <section class="status-grid" data-stock-state aria-label="Game state">
         <div class="stock-card">
           <div class="deck-back" aria-hidden="true"></div>
           <div>
             <span class="metric" data-stock-count>33</span>
-            <span class="label">карт осталось</span>
+            <span class="label" data-stock-label>cards left</span>
           </div>
         </div>
         <div>
           <span class="metric" data-pile-count>3</span>
-          <span class="label">стопок на столе</span>
+          <span class="label" data-pile-label>piles on table</span>
         </div>
         <div>
           <span class="metric" data-move-count>0</span>
-          <span class="label">ходов</span>
+          <span class="label" data-move-label>moves</span>
         </div>
         <div class="wide">
-          <span class="state" data-state>Ищу первую свертку.</span>
-          <span class="label" data-last-move>Первые три карты уже на столе.</span>
+          <span class="state" data-state>Looking for the first fold.</span>
+          <span class="label" data-last-move>The first three cards are already on the table.</span>
         </div>
       </section>
 
-      <section class="board" data-board aria-label="Игровой стол"></section>
+      <section class="board" data-board aria-label="Table"></section>
 
       <aside class="rules">
         <div class="layout-line" aria-live="polite">
-          <strong data-layout-label>Расклад:</strong>
+          <strong data-layout-label>Layout:</strong>
           <span data-layout></span>
         </div>
         <p>
-          <strong>Правило свертки:</strong>
-          если верхние карты левой и правой стопок в любой тройке совпадают по масти или достоинству,
-          средняя стопка переносится на левую. Цель - закончить колоду и оставить две стопки.
+          <strong data-rules-title>Fold rule:</strong>
+          <span data-rules-text>if the top cards of the left and right piles in any three-pile group match by suit or rank, the middle pile moves onto the left pile. The goal is to finish the stock and leave two piles.</span>
         </p>
       </aside>
     </main>

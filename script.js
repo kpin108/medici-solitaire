@@ -6,21 +6,89 @@
     { id: "clubs", symbol: "♣", name: "Трефы", color: "black" },
     { id: "spades", symbol: "♠", name: "Пики", color: "black" },
   ];
-  const RANK_LABELS = {
-    J: "В",
-    Q: "Д",
-    K: "К",
-    A: "Т",
-  };
-  const SUIT_LABELS = {
-    hearts: "ч",
-    diamonds: "б",
-    clubs: "т",
-    spades: "п",
+  const I18N = {
+    ru: {
+      meta: "36 карт • от 6 до туза",
+      title: "Пасьянс Медичи",
+      controlsLabel: "Управление пасьянсом",
+      next: "Ход",
+      undo: "Назад",
+      auto: "Авто",
+      stop: "Стоп",
+      reset: "Сначала",
+      solvable: "Склад",
+      searching: "Ищу...",
+      cardsLeft: "карт осталось",
+      pilesOnTable: "стопок на столе",
+      moves: "ходов",
+      stockStateLabel: "Состояние игры",
+      boardLabel: "Игровой стол",
+      initialState: "Ищу первую свертку.",
+      firstCards: "Первые три карты уже на столе.",
+      noMoves: "Ходов больше нет.",
+      won: "Пасьянс сошелся: осталось две стопки.",
+      finished: "Сверток больше нет, колода закончилась.",
+      foldAvailable: (move) => `Доступна свертка: ${move.leftIndex + 1}-${move.middleIndex + 1}-${move.rightIndex + 1}.`,
+      noFoldDeal: "Сверток нет: следующий ход доберет карту.",
+      dealMove: (card) => `Добор: ${describeCard(card, "ru")} ушла в новую стопку.`,
+      foldMove: (move) => `Свертка: стопка ${move.middleIndex + 1} легла на стопку ${move.leftIndex + 1}.`,
+      seedFallback: "Seed применен как обычное перемешивание.",
+      layout: "Расклад:",
+      layoutSeed: (seed) => `Расклад #${seed}:`,
+      rulesTitle: "Правило свертки:",
+      rulesText:
+        "если верхние карты левой и правой стопок в любой тройке совпадают по масти или достоинству, средняя стопка переносится на левую. Цель - закончить колоду и оставить две стопки.",
+      pileAria: (index, count) => `Стопка ${index + 1}, карт: ${count}`,
+      pileBadgeAria: (count) => `В стопке ${count} карт`,
+      langAria: "Переключение языка",
+      rankLabels: { J: "В", Q: "Д", K: "К", A: "Т" },
+      suitLabels: { hearts: "ч", diamonds: "б", clubs: "т", spades: "п" },
+    },
+    en: {
+      meta: "36 cards • 6 to ace",
+      title: "Medici Solitaire",
+      controlsLabel: "Solitaire controls",
+      next: "Move",
+      undo: "Back",
+      auto: "Auto",
+      stop: "Stop",
+      reset: "Restart",
+      solvable: "Solvable",
+      searching: "Finding...",
+      cardsLeft: "cards left",
+      pilesOnTable: "piles on table",
+      moves: "moves",
+      stockStateLabel: "Game state",
+      boardLabel: "Table",
+      initialState: "Looking for the first fold.",
+      firstCards: "The first three cards are already on the table.",
+      noMoves: "No moves left.",
+      won: "The solitaire is solved: two piles remain.",
+      finished: "No folds left, the stock is empty.",
+      foldAvailable: (move) => `Fold available: ${move.leftIndex + 1}-${move.middleIndex + 1}-${move.rightIndex + 1}.`,
+      noFoldDeal: "No folds: the next move deals a card.",
+      dealMove: (card) => `Deal: ${describeCard(card, "en")} went to a new pile.`,
+      foldMove: (move) => `Fold: pile ${move.middleIndex + 1} moved onto pile ${move.leftIndex + 1}.`,
+      seedFallback: "Seed applied as a regular shuffle.",
+      layout: "Layout:",
+      layoutSeed: (seed) => `Layout #${seed}:`,
+      rulesTitle: "Fold rule:",
+      rulesText:
+        "if the top cards of the left and right piles in any three-pile group match by suit or rank, the middle pile moves onto the left pile. The goal is to finish the stock and leave two piles.",
+      pileAria: (index, count) => `Pile ${index + 1}, cards: ${count}`,
+      pileBadgeAria: (count) => `${count} cards in this pile`,
+      langAria: "Language switch",
+      rankLabels: {},
+      suitLabels: { hearts: "h", diamonds: "d", clubs: "c", spades: "s" },
+    },
   };
 
-  function rankLabel(rank) {
-    return RANK_LABELS[rank] || rank;
+  function normalizeLanguage(value) {
+    return String(value || "").toLowerCase().startsWith("ru") ? "ru" : "en";
+  }
+
+  function rankLabel(rank, lang = "ru") {
+    return I18N[normalizeLanguage(lang)].rankLabels[rank] || rank;
   }
 
   function createDeck() {
@@ -30,7 +98,7 @@
         suit: suit.id,
         symbol: suit.symbol,
         color: suit.color,
-        label: rankLabel(rank),
+        label: rankLabel(rank, "ru"),
         id: `${rank}-${suit.id}`,
       })),
     );
@@ -223,17 +291,18 @@
     throw new Error(`Не удалось найти складной расклад за ${maxAttempts} попыток.`);
   }
 
-  function shortCard(card) {
-    return `${rankLabel(card.rank)}${SUIT_LABELS[card.suit] || card.symbol || card.suit[0]}`;
+  function shortCard(card, lang = "ru") {
+    const dict = I18N[normalizeLanguage(lang)];
+    return `${rankLabel(card.rank, lang)}${dict.suitLabels[card.suit] || card.symbol || card.suit[0]}`;
   }
 
-  function formatPile(pile) {
-    const cards = pile.map(shortCard);
+  function formatPile(pile, lang = "ru") {
+    const cards = pile.map((card) => shortCard(card, lang));
     return `<${cards.join(" ")}>`;
   }
 
-  function formatLayout(piles) {
-    return piles.map(formatPile).join(" ");
+  function formatLayout(piles, lang = "ru") {
+    return piles.map((pile) => formatPile(pile, lang)).join(" ");
   }
 
   const api = {
@@ -244,6 +313,7 @@
     findFoldMove,
     formatLayout,
     generateSolvableDeck,
+    normalizeLanguage,
     normalizeSeed,
     performNextStep,
     undoStep,
@@ -261,13 +331,24 @@
 
   let game = createGame();
   let currentSolvableSeed = null;
+  let currentLanguage = "en";
   let autoTimer = null;
 
   const elements = {
     board: document.querySelector("[data-board]"),
+    html: document.documentElement,
+    meta: document.querySelector("[data-meta]"),
+    title: document.querySelector("[data-title]"),
+    controls: document.querySelector("[data-controls]"),
+    languageSwitch: document.querySelector("[data-language-switch]"),
+    languageButtons: Array.from(document.querySelectorAll("[data-lang]")),
+    stockState: document.querySelector("[data-stock-state]"),
     stockCount: document.querySelector("[data-stock-count]"),
+    stockLabel: document.querySelector("[data-stock-label]"),
     pileCount: document.querySelector("[data-pile-count]"),
+    pileLabel: document.querySelector("[data-pile-label]"),
     moveCount: document.querySelector("[data-move-count]"),
+    moveLabel: document.querySelector("[data-move-label]"),
     state: document.querySelector("[data-state]"),
     lastMove: document.querySelector("[data-last-move]"),
     layoutLabel: document.querySelector("[data-layout-label]"),
@@ -278,50 +359,58 @@
     auto: document.querySelector("[data-auto]"),
     reset: document.querySelector("[data-reset]"),
     solvable: document.querySelector("[data-solvable]"),
+    rulesTitle: document.querySelector("[data-rules-title]"),
+    rulesText: document.querySelector("[data-rules-text]"),
   };
 
-  function describeCard(card) {
-    return `${rankLabel(card.rank)}${card.symbol}`;
+  function t() {
+    return I18N[currentLanguage];
+  }
+
+  function describeCard(card, lang = currentLanguage) {
+    return `${rankLabel(card.rank, lang)}${card.symbol}`;
   }
 
   function describeMove(move) {
+    const dict = t();
     if (!move) {
-      return "Первые три карты уже на столе.";
+      return dict.firstCards;
     }
     if (move.type === "deal") {
-      return `Добор: ${describeCard(move.card)} ушла в новую стопку.`;
+      return dict.dealMove(move.card);
     }
     if (move.type === "fold") {
-      return `Свертка: стопка ${move.middleIndex + 1} легла на стопку ${move.leftIndex + 1}.`;
+      return dict.foldMove(move);
     }
     if (move.type === "seed-fallback") {
-      return "Seed применен как обычное перемешивание.";
+      return dict.seedFallback;
     }
-    return "Ходов больше нет.";
+    return dict.noMoves;
   }
 
   function statusText() {
+    const dict = t();
     if (isWon(game)) {
-      return "Пасьянс сошелся: осталось две стопки.";
+      return dict.won;
     }
     if (!hasAvailableMove(game)) {
-      return "Сверток больше нет, колода закончилась.";
+      return dict.finished;
     }
     const nextMove = findFoldMove(game.piles);
     if (nextMove) {
-      return `Доступна свертка: ${nextMove.leftIndex + 1}-${nextMove.middleIndex + 1}-${nextMove.rightIndex + 1}.`;
+      return dict.foldAvailable(nextMove);
     }
-    return "Сверток нет: следующий ход доберет карту.";
+    return dict.noFoldDeal;
   }
 
   function createCardElement(card, className = "") {
     const cardElement = document.createElement("div");
     cardElement.className = `card ${card.color} ${className}`.trim();
-    cardElement.setAttribute("aria-label", `${rankLabel(card.rank)} ${card.symbol}`);
+    cardElement.setAttribute("aria-label", `${rankLabel(card.rank, currentLanguage)} ${card.symbol}`);
     cardElement.innerHTML = `
-      <span class="corner">${rankLabel(card.rank)}<span>${card.symbol}</span></span>
+      <span class="corner">${rankLabel(card.rank, currentLanguage)}<span>${card.symbol}</span></span>
       <span class="pip">${card.symbol}</span>
-      <span class="corner bottom">${rankLabel(card.rank)}<span>${card.symbol}</span></span>
+      <span class="corner bottom">${rankLabel(card.rank, currentLanguage)}<span>${card.symbol}</span></span>
     `;
     return cardElement;
   }
@@ -332,7 +421,7 @@
     pileElement.tabIndex = 0;
     pileElement.dataset.pileIndex = String(index);
     pileElement.style.setProperty("--cards", pile.length);
-    pileElement.setAttribute("aria-label", `Стопка ${index + 1}, карт: ${pile.length}`);
+    pileElement.setAttribute("aria-label", t().pileAria(index, pile.length));
 
     if (
       game.lastMove &&
@@ -356,7 +445,7 @@
     const badge = document.createElement("div");
     badge.className = "pile-badge";
     badge.textContent = pile.length;
-    badge.setAttribute("aria-label", `В стопке ${pile.length} карт`);
+    badge.setAttribute("aria-label", t().pileBadgeAria(pile.length));
     pileElement.appendChild(badge);
 
     return pileElement;
@@ -379,19 +468,42 @@
   }
 
   function render() {
+    const dict = t();
     hidePeek();
+    elements.html.lang = currentLanguage;
+    document.title = dict.title;
+    elements.meta.textContent = dict.meta;
+    elements.title.textContent = dict.title;
+    elements.controls.setAttribute("aria-label", dict.controlsLabel);
+    elements.languageSwitch.setAttribute("aria-label", dict.langAria);
+    elements.languageButtons.forEach((button) => {
+      const active = button.dataset.lang === currentLanguage;
+      button.classList.toggle("active", active);
+      button.setAttribute("aria-pressed", String(active));
+    });
+    elements.stockState.setAttribute("aria-label", dict.stockStateLabel);
+    elements.board.setAttribute("aria-label", dict.boardLabel);
     elements.board.replaceChildren(...game.piles.map(renderPile));
     elements.stockCount.textContent = game.stock.length;
+    elements.stockLabel.textContent = dict.cardsLeft;
     elements.pileCount.textContent = game.piles.length;
+    elements.pileLabel.textContent = dict.pilesOnTable;
     elements.moveCount.textContent = game.history.length;
+    elements.moveLabel.textContent = dict.moves;
     elements.state.textContent = statusText();
     elements.lastMove.textContent = describeMove(game.lastMove);
-    elements.layoutLabel.textContent = currentSolvableSeed ? `Расклад #${currentSolvableSeed}:` : "Расклад:";
-    elements.layout.textContent = formatLayout(game.piles);
+    elements.layoutLabel.textContent = currentSolvableSeed ? dict.layoutSeed(currentSolvableSeed) : dict.layout;
+    elements.layout.textContent = formatLayout(game.piles, currentLanguage);
     elements.next.disabled = isFinished(game) || game.running;
+    elements.next.textContent = dict.next;
     elements.undo.disabled = game.running || !game.undoStack.length;
-    elements.auto.textContent = game.running ? "Стоп" : "Авто";
+    elements.undo.textContent = dict.undo;
+    elements.auto.textContent = game.running ? dict.stop : dict.auto;
     elements.auto.classList.toggle("active", game.running);
+    elements.reset.textContent = dict.reset;
+    elements.solvable.textContent = elements.solvable.disabled ? dict.searching : dict.solvable;
+    elements.rulesTitle.textContent = dict.rulesTitle;
+    elements.rulesText.textContent = dict.rulesText;
   }
 
   function stopAuto() {
@@ -445,7 +557,7 @@
     stopAuto();
     const normalized = normalizeSeed(seedValue ?? randomSeed());
     elements.solvable.disabled = true;
-    elements.solvable.textContent = "Ищу...";
+    elements.solvable.textContent = t().searching;
     window.setTimeout(() => {
       try {
         try {
@@ -457,7 +569,6 @@
         currentSolvableSeed = normalized.label;
       } finally {
         elements.solvable.disabled = false;
-        elements.solvable.textContent = "Склад";
         render();
       }
     }, 20);
@@ -472,6 +583,12 @@
   elements.auto.addEventListener("click", startAuto);
   elements.reset.addEventListener("click", reset);
   elements.solvable.addEventListener("click", () => resetSolvable());
+  elements.languageButtons.forEach((button) => {
+    button.addEventListener("click", () => {
+      currentLanguage = normalizeLanguage(button.dataset.lang);
+      render();
+    });
+  });
   elements.board.addEventListener("pointerover", (event) => {
     const pile = event.target.closest(".pile");
     if (pile && elements.board.contains(pile)) {
@@ -493,6 +610,7 @@
     }
   });
 
+  currentLanguage = normalizeLanguage(window.navigator && (window.navigator.language || window.navigator.userLanguage));
   const params = new URLSearchParams(window.location.search);
   if (params.has("seed")) {
     resetSolvable(params.get("seed"));
