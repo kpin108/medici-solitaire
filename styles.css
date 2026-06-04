@@ -419,6 +419,12 @@ h1 {
   font-size: 13px;
 }
 
+.layout-line [data-layout-seed] {
+  font-family: inherit;
+  font-size: inherit;
+  font-weight: 400;
+}
+
 @keyframes settle {
   from {
     opacity: 0;

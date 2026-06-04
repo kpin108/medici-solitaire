@@ -33,8 +33,7 @@
       dealMove: (card) => `Добор: ${describeCard(card, "ru")} ушла в новую стопку.`,
       foldMove: (move) => `Свертка: стопка ${move.middleIndex + 1} легла на стопку ${move.leftIndex + 1}.`,
       seedFallback: "Seed применен как обычное перемешивание.",
-      layout: "Расклад:",
-      layoutSeed: (seed) => `Расклад #${seed}:`,
+      foldsLabel: "Свертки",
       rulesTitle: "Правило свертки:",
       rulesText:
         "если верхние карты левой и правой стопок в любой тройке совпадают по масти или достоинству, средняя стопка переносится на левую. Цель - закончить колоду и оставить две стопки.",
@@ -70,8 +69,7 @@
       dealMove: (card) => `Deal: ${describeCard(card, "en")} went to a new pile.`,
       foldMove: (move) => `Fold: pile ${move.middleIndex + 1} moved onto pile ${move.leftIndex + 1}.`,
       seedFallback: "Seed applied as a regular shuffle.",
-      layout: "Layout:",
-      layoutSeed: (seed) => `Layout #${seed}:`,
+      foldsLabel: "Folds",
       rulesTitle: "Fold rule:",
       rulesText:
         "if the top cards of the left and right piles in any three-pile group match by suit or rank, the middle pile moves onto the left pile. The goal is to finish the stock and leave two piles.",
@@ -160,6 +158,8 @@
       undoStack: [],
       lastMove: null,
       running: false,
+      foldGroups: [],
+      currentFoldGroup: deck.slice(0, 3).map((card) => ({ ...card })),
     };
   }
 
@@ -193,6 +193,8 @@
       piles: game.piles.map((pile) => pile.map((card) => ({ ...card }))),
       history: (game.history || []).map((move) => ({ ...move })),
       lastMove: game.lastMove ? { ...game.lastMove } : null,
+      foldGroups: (game.foldGroups || []).map((group) => group.map((card) => ({ ...card }))),
+      currentFoldGroup: (game.currentFoldGroup || []).map((card) => ({ ...card })),
     };
   }
 
@@ -201,6 +203,8 @@
     game.piles = snapshot.piles.map((pile) => pile.map((card) => ({ ...card })));
     game.history = snapshot.history.map((move) => ({ ...move }));
     game.lastMove = snapshot.lastMove ? { ...snapshot.lastMove } : null;
+    game.foldGroups = snapshot.foldGroups.map((group) => group.map((card) => ({ ...card })));
+    game.currentFoldGroup = snapshot.currentFoldGroup.map((card) => ({ ...card }));
   }
 
   function rememberState(game) {
@@ -210,6 +214,12 @@
 
   function performFold(game, move) {
     rememberState(game);
+    game.foldGroups = game.foldGroups || [];
+    game.currentFoldGroup = game.currentFoldGroup || [];
+    if (game.currentFoldGroup.length > 0) {
+      game.foldGroups.push(game.currentFoldGroup.map((card) => ({ ...card })));
+      game.currentFoldGroup = [];
+    }
     const middlePile = game.piles[move.middleIndex];
     game.piles[move.leftIndex].push(...middlePile);
     game.piles.splice(move.middleIndex, 1);
@@ -228,6 +238,8 @@
     }
     rememberState(game);
     const card = game.stock.shift();
+    game.currentFoldGroup = game.currentFoldGroup || [];
+    game.currentFoldGroup.push({ ...card });
     game.piles.push([card]);
     const result = { type: "deal", card, pileIndex: game.piles.length - 1 };
     game.lastMove = result;
@@ -305,12 +317,21 @@
     return piles.map((pile) => formatPile(pile, lang)).join(" ");
   }
 
+  function formatFoldGroups(groups = [], currentGroup = [], lang = "ru") {
+    const allGroups = groups.slice();
+    if (currentGroup.length > 0) {
+      allGroups.push(currentGroup);
+    }
+    return allGroups.map((group) => formatPile(group, lang)).join(" ");
+  }
+
   const api = {
     RANKS,
     SUITS,
     createDeck,
     createGame,
     findFoldMove,
+    formatFoldGroups,
     formatLayout,
     generateSolvableDeck,
     normalizeLanguage,
@@ -352,6 +373,7 @@
     state: document.querySelector("[data-state]"),
     lastMove: document.querySelector("[data-last-move]"),
     layoutLabel: document.querySelector("[data-layout-label]"),
+    layoutSeed: document.querySelector("[data-layout-seed]"),
     layout: document.querySelector("[data-layout]"),
     peekLayer: document.querySelector("[data-peek-layer]"),
     next: document.querySelector("[data-next]"),
@@ -491,8 +513,9 @@
     elements.moveLabel.textContent = dict.moves;
     elements.state.textContent = statusText();
     elements.lastMove.textContent = describeMove(game.lastMove);
-    elements.layoutLabel.textContent = currentSolvableSeed ? dict.layoutSeed(currentSolvableSeed) : dict.layout;
-    elements.layout.textContent = formatLayout(game.piles, currentLanguage);
+    elements.layoutLabel.textContent = dict.foldsLabel;
+    elements.layoutSeed.textContent = currentSolvableSeed ? ` #${currentSolvableSeed}:` : ":";
+    elements.layout.textContent = formatFoldGroups(game.foldGroups, game.currentFoldGroup, currentLanguage);
     elements.next.disabled = isFinished(game) || game.running;
     elements.next.textContent = dict.next;
     elements.undo.disabled = game.running || !game.undoStack.length;
